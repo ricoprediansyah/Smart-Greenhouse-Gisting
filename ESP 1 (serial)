@@ -28,10 +28,22 @@ PubSubClient client(espClient);
 unsigned long lastMsgTime = 0;
 const long Interval = 5000; // Kirim data setiap 5 detik
 
-// *SOIL*
+// SOIL
 Adafruit_ADS1115 ads;
 
-// *WATER**
+// *WEIGHT
+#include <HX711_ADC.h>
+
+const int HX711_dout_1 = 18;
+const int HX711_sck_1 = 19;
+
+const int HX711_dout_2 = 4; // Ganti dengan pin dout sensor berat kedua
+const int HX711_sck_2 = 5;  // Ganti dengan pin sck sensor berat kedua
+
+HX711_ADC LoadCell_1(HX711_dout_1, HX711_sck_1);
+HX711_ADC LoadCell_2(HX711_dout_2, HX711_sck_2);
+
+// WATER*
 #define LED_BUILTIN 23
 
 // Define pins for water flow sensors
@@ -139,6 +151,7 @@ void setup(void)
     printLocalTime();
     setsoil();
     setwater();
+    setweight();
 }
 
 void loop()
@@ -149,6 +162,7 @@ void loop()
     //printLocalTime();
     sensorsoil();
     sensorwater();
+    sensorweight();
 
     //nodered();
 
@@ -178,8 +192,10 @@ void nodered()
              "\"water10\": %.2f,"
              "\"water11\": %.2f,"
              "\"water12\": %.2f,"
+            "\"weight1\": %.2f,"
+             "\"weight2\": %.2f,"
              "}",
-             tahun, bulan, tanggal, jam, minute, second, fix0, fix1, fix2, flowRate1, flowRate2, flowRate3, flowRate4, flowRate5, flowRate6, flowRate7, flowRate8, flowRate9, flowRate10, flowRate11, flowRate12);
+             tahun, bulan, tanggal, jam, minute, second, fix0, fix1, fix2, flowRate1, flowRate2, flowRate3, flowRate4, flowRate5, flowRate6, flowRate7, flowRate8, flowRate9, flowRate10, flowRate11, flowRate12, LoadCell_1.getData(), LoadCell_2.getData());
 
     client.publish(topic_utama, utamaStr); // Mengirim data suhu ke broker MQTT
 }
@@ -498,8 +514,46 @@ void sensorwater()
 
         //Serial.print("Flow 12: ");
         Serial.print(int(flowRate12)); // Print the integer part of the variable
-        Serial.print("");
-
-        Serial.println("");
+        Serial.print(", ");
     }
+}
+
+void setweight()
+{
+    LoadCell_1.begin();
+    LoadCell_1.start(2000);
+    LoadCell_1.setCalFactor(106.26);
+
+    LoadCell_2.begin();
+    LoadCell_2.start(2000);
+    LoadCell_2.setCalFactor(106.26);
+}
+
+void sensorweight()
+{
+    LoadCell_1.update();
+    LoadCell_2.update();
+
+    float weight_1 = LoadCell_1.getData();
+    float weight_2 = LoadCell_2.getData();
+
+    if (weight_1 < 0)
+    {
+        weight_1 = 0;
+    }
+
+    if (weight_2 < 0)
+    {
+        weight_2 = 0;
+    }
+
+    //Serial.print("Weight Sensor 1 [g]: ");
+    Serial.print(weight_1);
+    Serial.print(", ");
+
+    //Serial.print("Weight Sensor 2 [g]: ");
+    Serial.print(weight_2);
+    Serial.print("");
+
+    Serial.println("");
 }
