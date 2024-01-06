@@ -96,13 +96,13 @@ void nodered()
     char utamaStr[1000]; // Buffer untuk menyimpan JSON
     snprintf(utamaStr, sizeof(utamaStr),
              "{"
-             "\"timestamp\": \"%04d-%02d-%02dT%02d:%02d:%02d+07:00\","
+             //"\"datetime\": \"%04d-%02d-%02dT%02d:%02d:%02d+07:00\","
              "\"ph\": %.2f,"
              "\"tdsmeter\": %.2f,"
              "\"suhuair\": %.2f,"
              "\"raingauge\": %.2f"
              "}",
-             tahun, bulan, tanggal, jam, minute, second, phValue, tdsValue, temperature, mm);
+            phValue, tdsValue, temperature, mm);
     client.publish(topic_utama, utamaStr);
 }
 
