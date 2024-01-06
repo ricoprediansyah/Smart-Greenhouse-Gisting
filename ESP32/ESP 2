@@ -3,10 +3,14 @@
 #include <PubSubClient.h>
 #include <WiFi.h>
 #include "time.h"
+
 #include <Wire.h>
 #include <Adafruit_ADS1X15.h>
+
 #include <DHT.h>
+
 #include <SoftwareSerial.h>
+
 #include <Adafruit_MLX90614.h>
 
 // Konfigurasi jaringan Wi-Fi
@@ -56,20 +60,22 @@ Adafruit_MLX90614 mlx2 = Adafruit_MLX90614(); // Objek untuk sensor kedua
 // ************************END*****************************
 
 // ********************RELAY*************************
-#define RELAY_PIN 26
-#define RELAY_PIN2 26
+#define RELAY_PIN 18
+#define RELAY_PIN2 19
 
 int relay1, relay2;
 
 // ********************WEIGHT*************************
-#include <HX711.h>
+#include <HX711_ADC.h>
 
-HX711 scale1;
-HX711 scale2;
+const int HX711_dout_1 = 5;
+const int HX711_sck_1 = 4;
 
-// Calibration factors (adjust based on your load cell and setup)
-float calibration_factor1 = 220.f; 
-float calibration_factor2 = 220.f;
+const int HX711_dout_2 = 2; // Ganti dengan pin dout sensor berat kedua
+const int HX711_sck_2 = 15;  // Ganti dengan pin sck sensor berat kedua
+
+HX711_ADC LoadCell_1(HX711_dout_1, HX711_sck_1);
+HX711_ADC LoadCell_2(HX711_dout_2, HX711_sck_2);
 
 // ***********************END************************
 
@@ -118,7 +124,7 @@ void loop()
 
     nodered();
 
-    delay(60000);
+    delay(30000);
 }
 
 void nodered()
@@ -128,19 +134,19 @@ void nodered()
     char utamaStr[1000]; // Buffer untuk menyimpan JSON
     snprintf(utamaStr, sizeof(utamaStr),
              "{"
-             "\"TimeStamp\": \"%04d-%02d-%02dT%02d:%02d:%02d+07:00\","
-             "\"temperature\": %.2f,"
-             "\"humidity\": %.2f,"
-             "\"infra1\": %.2f,"
-             "\"infra2\": %.2f,"
-             "\"windspeed\": %.2f,"
-             "\"winddirection\": %.2f,"
-             "\"weight3\": %.2f,"
-             "\"weight4\": %.2f,"
-             "\"relayuv\": %.2f,"
-             "\"relaymist\": %.2f"
+             "\"datetime\": \"%04d-%02d-%02dT%02d:%02d:%02d+07:00\","
+             "\"suhuudara\": %.2f,"
+            // "\"humidity\": %.2f,"
+             "\"infrared_1\": %.2f,"
+             "\"infrared_2\": %.2f,"
+             "\"anemo\": %.2f,"
+             "\"winddirect\": %.2f,"
+             "\"weight_3\": %.2f,"
+             "\"weight_4\": %.2f,"
+             "\"uvlampu\": %.2f,"
+             "\"coolingsystem\": %.2f"
              "}",
-             tahun, bulan, tanggal, jam, minute, second, temperature, humidity, mlx1.readObjectTempC(), mlx2.readObjectTempC(), Address0, degrees, scale1.set_scale(), scale2.set_scale(), relay1, relay2);
+             tahun, bulan, tanggal, jam, minute, second, temperature, mlx1.readObjectTempC(), mlx2.readObjectTempC(), Address0, degrees, LoadCell_1.getData(), LoadCell_2.getData(), relay1, relay2);
 
     client.publish(topic_utama, utamaStr); // Mengirim data suhu ke broker MQTT
 }
@@ -256,6 +262,8 @@ void relay33()
     {
         digitalWrite(RELAY_PIN2, HIGH);
         relay2 = 0;
+        Serial.print("Relay 2 = ");
+        Serial.print(relay2);
         Serial.println(relay2);
     }
 }
@@ -310,24 +318,38 @@ void sensorinfra()
 
 
 void setweight() {
-  Serial.begin(9600);
-  scale1.begin(4, 5);
-  scale2.begin(6, 7);
-  scale1.set_scale(calibration_factor1);
-  scale2.set_scale(calibration_factor2);
-  scale1.tare(); // Zero the scale 1
-  scale2.tare(); // Zero the scale 2
+
+    LoadCell_1.begin();
+    LoadCell_1.start(2000);
+    LoadCell_1.setCalFactor(106.26);
+
+    LoadCell_2.begin();
+    LoadCell_2.start(2000);
+    LoadCell_2.setCalFactor(106.26);
 }
 
 void sensorweight() {
-  float weight1 = scale1.get_units();
-  float weight2 = scale2.get_units();
-  Serial.print("Weight 1: ");
-  Serial.print(weight1);
-  Serial.println(" kg");
-  Serial.print("Weight 2: ");
-  Serial.print(weight2);
-  Serial.println(" kg");
+    LoadCell_1.update();
+    LoadCell_2.update();
+
+    float weight_1 = LoadCell_1.getData();
+    float weight_2 = LoadCell_2.getData();
+
+    if (weight_1 < 0)
+    {
+        weight_1 = 0;
+    }
+
+    if (weight_2 < 0)
+    {
+        weight_2 = 0;
+    }
+
+    Serial.print("Weight Sensor 1 [g]: ");
+    Serial.println(weight_1);
+
+    Serial.print("Weight Sensor 2 [g]: ");
+    Serial.println(weight_2);
 }
 
 void setanemo()
