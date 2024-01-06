@@ -59,6 +59,7 @@ HX711_ADC LoadCell_2(HX711_dout_2, HX711_sck_2);
 #define SENSOR10 26
 #define SENSOR11 25
 #define SENSOR12 33
+//qefweg
 
 long currentMillis = 0;
 long previousMillis = 0;
