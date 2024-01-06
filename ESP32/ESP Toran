@@ -98,9 +98,9 @@ void nodered()
              "{"
              "\"timestamp\": \"%04d-%02d-%02dT%02d:%02d:%02d+07:00\","
              "\"ph\": %.2f,"
-             "\"tds\": %.2f,"
-             "\"temp_air\": %.2f,"
-             "\"hujan\": %.2f"
+             "\"tdsmeter\": %.2f,"
+             "\"suhuair\": %.2f,"
+             "\"raingauge\": %.2f"
              "}",
              tahun, bulan, tanggal, jam, minute, second, phValue, tdsValue, temperature, mm);
     client.publish(topic_utama, utamaStr);
