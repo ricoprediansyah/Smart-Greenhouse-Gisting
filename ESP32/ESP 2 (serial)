@@ -3,7 +3,7 @@
 #include <PubSubClient.h>
 #include "time.h"
 #include <Adafruit_ADS1X15.h>
-
+//gas
 #include <Wire.h>
 
 // Konfigurasi jaringan Wi-Fi
