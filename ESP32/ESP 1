@@ -130,12 +130,12 @@ void loop()
 void nodered()
 {
 
-    // Buat objek JSON yang berisi data dari keempat sensor
+    // Buat objek JSON yang berisi data dari keempat sensorrr
     char utamaStr[1000]; // Buffer untuk menyimpan JSON
     snprintf(utamaStr, sizeof(utamaStr),
              "{"
              "\"datetime\": \"%04d-%02d-%02dT%02d:%02d:%02d+07:00\","
-             "\"suhuudara\": %.2f,"
+             "\"dht\": %.2f,"
             // "\"humidity\": %.2f,"
              "\"infrared_1\": %.2f,"
              "\"infrared_2\": %.2f,"

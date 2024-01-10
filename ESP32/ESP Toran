@@ -106,6 +106,8 @@ void nodered()
     client.publish(topic_utama, utamaStr);
 }
 
+//tes aja
+
 void printLocalTime()
 {
     struct tm timeinfo;

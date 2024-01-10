@@ -6,7 +6,7 @@
 //gas
 #include <Wire.h>
 
-// Konfigurasi jaringan Wi-Fi
+// Konfigurasi jaringan Wi-Fiii
 const char *ssid = "Lab Telkom 2.4 GHz";
 const char *password = "telekomunikasi";
 

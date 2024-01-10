@@ -189,7 +189,7 @@ void nodered()
              "}",
              //tahun, bulan, tanggal, jam, minute, second, 
              fix0, fix1, fix2, flowRate1, flowRate2, flowRate3, flowRate4, flowRate5);
-
+//tesss
     client.publish(topic_utama, utamaStr); // Mengirim data suhu ke broker MQTT
 
     char keduaStr[1000];
